@@ -45,73 +45,75 @@ def two_line(queue: str) -> bool:
             l +=1
         elif char == 'O':
             o +=1
-
-    total = i + j + l + o
-
-    # Check if count is 6 or 5 as per problem statement
-    if total not in (5,6):
+    print(o,i,j,l)
+    if i >= 1 and o >= 2 and j >= 1 and l >= 1:
+        return True
+    elif i >= 2 and o >= 1 and l >= 2:
+        return True
+    elif o >= 1 and l >= 2 and j >= 2:
+        return True
+    elif o >= 1 and i >= 2 and j >= 2:
+        return True
+    elif i >= 3 and l >= 1 and j >= 1:
+        return True
+    elif i >= 1 and l >= 3 and j >= 1:
+        return True
+    elif i >= 1 and j >= 1 and j >= 3:
+        return True
+    elif o >= 3 and j >= 2:
+        return True
+    elif o >= 3 and i >= 2:
+        return True
+    elif o >= 3 and l >= 2:
+        return True
+    else:
         return False
-
-    # For the case when count is 6:
-    if total ==6:
-        ij_mod2 = (i +j) %2
-        il_mod2 = (i +l) %2
-
-        possible_removals = []
-
-        # Try removing an I or J based on which mod we're in for IJ
-        if ij_mod2 ==0 and i>0:
-            new_i, new_j = i-1, j
-        elif ij_mod2 ==1 and j>0:
-            new_i, new_j =i, j-1
-
-        # Now check after removal whether IL mod is satisfied
-        if (new_i + l) %2 == il_mod2:
-            return True
-
-    # For the case when count is5
-    elif total ==5:
-        ij_sum = i+j
-        il_sum = i+l
-        if ij_sum%2 ==0 and il_sum%2==0:
-            return True
-
-    return False
 
 def create_note(i, page) -> None:
     queue = ','.join(page.comment.translate(translate_table)[:11]) # the queue
     save_text = pages[i+10].comment.translate(translate_table)[:1]
-    queue_id = str(int(i + 10+two_line_count / 10+two_line_count)) # account for two_line_count
+    queue_id = str(int( (i + 10+two_line_count) / (10+two_line_count) )) # account for two_line_count
     queue = '<a href="https://himitsuconfidential.github.io/downstack-practice/usermode.html/=' + queue + '" > PC# ' + queue_id + '</a>'
     gif_name= queue + '.gif'
+    print("creating card: " + queue + ' ' + save_text + ' ')
     my_note = genanki.Note(
         model=my_model,
         fields=[queue + " " + save_text, '<img src ="' + gif_name + '">'])
     my_deck.add_note(my_note)
 
-def create_gif(start_index, end_index):
-        gif_name = queue + ".gif"
-        command = 'node ../fumen-canvas/fumen-canvas.js gif ' + fumen + ' ' + gif_name + ' --start ' + str(start_index) + ' --end ' + str(end_index)
-        print('created  '+gif_name)
-        os.system(command)
-        my_package.media_files.append(gif_name)
+def create_gif(i, start_index, end_index):
+    print("creating gif at " + str(start_index) + ' ' + str(end_index))
+    gif_name = str(i)+ queue + ".gif"
+    command = 'node ../fumen-canvas/fumen-canvas.js gif ' + fumen + ' ' + gif_name + ' --start ' + str(start_index) + ' --end ' + str(end_index)
+    print('created  '+gif_name)
+    os.system(command)
+    my_package.media_files.append(gif_name)
 
 remove_chars = {'#', 'Q', '[', ']', '=', '(', ')'}
 translate_table = str.maketrans('', '', ''.join(remove_chars))
 two_line_count = 0
 for i, page in enumerate(pages):
-    if i % 10 + two_line_count == 0 and i + 10 < len(pages):
-        queue = ','.join(page.comment.translate(translate_table)[:11]) # the queue
+    if i % (10+two_line_count) == 0 and i + 10 + two_line_count < len(pages):
+
+
+        queue = ','.join(page.comment.translate(translate_table)[:11])
         if two_line(queue[:11]):
-            two_line_count += 5
-            create_gif(i, i+two_line_count)
+            print(queue[:11] + "creating gif for two line pc, " + str(i))
+            create_gif(i, two_line_count + i, i + 5 + two_line_count)
             #ask user if the file is a 2 line PC
             #if yes then add 5 to two_line_count and create the note
-            create_note(i, page)
+            is_two_line = input("Is it a two line? y/n")
+            if is_two_line == 'y': # TODO after the first two line the second one is off set
+                create_note(two_line_count + i, page)
+                two_line_count += 5
+            else:
+                create_gif(i, i + two_line_count, i + 10 + two_line_count)
+                create_note(i + two_line_count, page)
 
         else:
-            create_gif(i, i+10+two_line_count)
-            create_note(i, page)
+            print("creating gif for four line pc, " + str(i))
+            create_gif(i, i + two_line_count, i+two_line_count+10)
+            create_note(i + two_line_count, page)
 
 genanki.Package(my_deck).write_to_file('output.apkg')
 # Define the directory where your GIFs are stored
