@@ -25,7 +25,49 @@ my_model = genanki.Model(
     }
   ],
 )
+def two_line(queue: str) -> bool:
+    i, j, l, o = 0, 0, 0, 0
+    for char in queue:
+        if char == 'I':
+            i +=1
+        elif char == 'J':
+            j +=1
+        elif char == 'L':
+            l +=1
+        elif char == 'O':
+            o +=1
 
+    total = i + j + l + o
+
+    # Check if count is 6 or 5 as per problem statement
+    if total not in (5,6):
+        return False
+
+    # For the case when count is 6:
+    if total ==6:
+        ij_mod2 = (i +j) %2
+        il_mod2 = (i +l) %2
+
+        possible_removals = []
+
+        # Try removing an I or J based on which mod we're in for IJ
+        if ij_mod2 ==0 and i>0:
+            new_i, new_j = i-1, j
+        elif ij_mod2 ==1 and j>0:
+            new_i, new_j =i, j-1
+
+        # Now check after removal whether IL mod is satisfied
+        if (new_i + l) %2 == il_mod2:
+            return True
+
+    # For the case when count is5
+    elif total ==5:
+        ij_sum = i+j
+        il_sum = i+l
+        if ij_sum%2 ==0 and il_sum%2==0:
+            return True
+
+    return False
 my_deck = genanki.Deck(
     1520042884,
 'genanki-fumen-deck')
