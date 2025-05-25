@@ -45,7 +45,7 @@ def two_line(queue: str) -> bool:
             l +=1
         elif char == 'O':
             o +=1
-    print(o,i,j,l)
+    #print(o,i,j,l)
     if i >= 1 and o >= 2 and j >= 1 and l >= 1:
         return True
     elif i >= 2 and o >= 1 and l >= 2:
@@ -69,56 +69,51 @@ def two_line(queue: str) -> bool:
     else:
         return False
 
-def create_note(i, page) -> None:
-    queue = ','.join(page.comment.translate(translate_table)[:11]) # the queue
+def create_note(page) -> None:
+    queue = ','.join(page.comment.translate(translate_table)[:11])
     save_text = pages[i+10].comment.translate(translate_table)[:1]
-    queue_id = str(int( (i + 10+two_line_count) / (10+two_line_count) )) # account for two_line_count
-    queue = '<a href="https://himitsuconfidential.github.io/downstack-practice/usermode.html/=' + queue + '" > PC# ' + queue_id + '</a>'
-    gif_name= queue + '.gif'
-    print("creating card: " + queue + ' ' + save_text + ' ')
+    queue = '<a href="https://himitsuconfidential.github.io/downstack-practice/usermode.html/=' + queue + '" > PC# ' + str(pc_count) + '</a>'
+    gif_name= str(pc_count) + '-' + queue + '.gif'
+    #print("creating card: " + queue + ' ' + save_text + ' ')
     my_note = genanki.Note(
         model=my_model,
         fields=[queue + " " + save_text, '<img src ="' + gif_name + '">'])
     my_deck.add_note(my_note)
 
-def create_gif(i, start_index, end_index):
-    print("creating gif at " + str(start_index) + ' ' + str(end_index))
-    gif_name = str(i)+ queue + ".gif"
+def create_gif(start_index, end_index):
+    #print("creating gif at " + str(start_index) + ' ' + str(end_index))
+    gif_name = str(pc_count) + queue + ".gif"
     command = 'node ../fumen-canvas/fumen-canvas.js gif ' + fumen + ' ' + gif_name + ' --start ' + str(start_index) + ' --end ' + str(end_index)
-    print('created  '+gif_name)
+    #print('created  '+gif_name)
     os.system(command)
     my_package.media_files.append(gif_name)
 
 remove_chars = {'#', 'Q', '[', ']', '=', '(', ')'}
 translate_table = str.maketrans('', '', ''.join(remove_chars))
 two_line_count = 0
+pc_count = 0
+print("generating pc notes and gifs ...\n")
 for i, page in enumerate(pages):
-    #if a two line pc occurs how does this effect the ia
-    #currently if i is divisible by 10 we are considering that the start of a pc
-    #but with a 2line pc we are now looking at when i % 10 == 5?
-    if i % 10== 0+two_line_count and i + 10+two_line_count < len(pages):
-
-        print("queue is: " + page.comment.translate(translate_table)[:11])
+    if i % 10 == 0 + two_line_count and i + 10 + two_line_count < len(pages):
+        pc_count += 1
+        #print("queue is: " + page.comment.translate(translate_table)[:11])
         queue = ','.join(page.comment.translate(translate_table)[:11])
-        if two_line(queue[:11]):
-            create_gif(i, i, i + 5)
-            #ask user if the file is a 2 line PC
-            #if yes then add 5 to two_line_count and create the note
-            is_two_line = input("Is it a two line? y/n")
-            if is_two_line == 'y': # TODO after the first two line the second one is off set
-                create_note(i, page)
+        if two_line(queue[:11]): # the first 6 pieces are in the first 11 characters of queue
+            create_gif(i, i + 5)  # create a gif so that we can check if it is a two line PC
+            is_two_line = input("Is PC# " + str(pc_count) + " a two line PC? y/n\n")
+            if is_two_line == 'y':
+                create_note(page)
                 if two_line_count == 0:
                     two_line_count += 5
                 else:
                     two_line_count = 0
             else:
-                create_gif(i, i, i + 10)
-                create_note(i, page)
-
+                create_gif(i, i + 10)
+                create_note( page)
         else:
-            print("creating gif for four line pc, " + str(i))
-            create_gif(i, i, i+two_line_count+10)
-            create_note(i, page)
+            #print("creating gif for four line pc, " + str(i))
+            create_gif(i, i+two_line_count+10)
+            create_note(page)
 
 genanki.Package(my_deck).write_to_file('output.apkg')
 # Define the directory where your GIFs are stored
