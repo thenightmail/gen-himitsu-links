@@ -93,27 +93,32 @@ remove_chars = {'#', 'Q', '[', ']', '=', '(', ')'}
 translate_table = str.maketrans('', '', ''.join(remove_chars))
 two_line_count = 0
 for i, page in enumerate(pages):
-    if i % (10+two_line_count) == 0 and i + 10 + two_line_count < len(pages):
+    #if a two line pc occurs how does this effect the ia
+    #currently if i is divisible by 10 we are considering that the start of a pc
+    #but with a 2line pc we are now looking at when i % 10 == 5?
+    if i % 10== 0+two_line_count and i + 10+two_line_count < len(pages):
 
-
+        print("queue is: " + page.comment.translate(translate_table)[:11])
         queue = ','.join(page.comment.translate(translate_table)[:11])
         if two_line(queue[:11]):
-            print(queue[:11] + "creating gif for two line pc, " + str(i))
-            create_gif(i, two_line_count + i, i + 5 + two_line_count)
+            create_gif(i, i, i + 5)
             #ask user if the file is a 2 line PC
             #if yes then add 5 to two_line_count and create the note
             is_two_line = input("Is it a two line? y/n")
             if is_two_line == 'y': # TODO after the first two line the second one is off set
-                create_note(two_line_count + i, page)
-                two_line_count += 5
+                create_note(i, page)
+                if two_line_count == 0:
+                    two_line_count += 5
+                else:
+                    two_line_count = 0
             else:
-                create_gif(i, i + two_line_count, i + 10 + two_line_count)
-                create_note(i + two_line_count, page)
+                create_gif(i, i, i + 10)
+                create_note(i, page)
 
         else:
             print("creating gif for four line pc, " + str(i))
-            create_gif(i, i + two_line_count, i+two_line_count+10)
-            create_note(i + two_line_count, page)
+            create_gif(i, i, i+two_line_count+10)
+            create_note(i, page)
 
 genanki.Package(my_deck).write_to_file('output.apkg')
 # Define the directory where your GIFs are stored
