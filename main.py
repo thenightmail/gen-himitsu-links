@@ -68,21 +68,21 @@ def two_line(queue: str) -> bool:
         return True
     else:
         return False
-
+#TODO fix the naming of gifs to correspond
 def create_note(page) -> None:
     queue = ','.join(page.comment.translate(translate_table)[:11])
     save_text = pages[i+10].comment.translate(translate_table)[:1]
-    queue = '<a href="https://himitsuconfidential.github.io/downstack-practice/usermode.html/=' + queue + '" > PC# ' + str(pc_count) + '</a>'
+    queue_desc = '<a href="https://himitsuconfidential.github.io/downstack-practice/usermode.html/=' + queue + '" > PC# ' + str(pc_count) + '</a>'
     gif_name= str(pc_count) + '-' + queue + '.gif'
     #print("creating card: " + queue + ' ' + save_text + ' ')
     my_note = genanki.Note(
         model=my_model,
-        fields=[queue + " " + save_text, '<img src ="' + gif_name + '">'])
+        fields=[queue_desc + " " + save_text, '<img src ="' + gif_name + '">'])
     my_deck.add_note(my_note)
 
 def create_gif(start_index, end_index):
     #print("creating gif at " + str(start_index) + ' ' + str(end_index))
-    gif_name = str(pc_count) + queue + ".gif"
+    gif_name = str(pc_count) + '-' + queue + ".gif"
     command = 'node ../fumen-canvas/fumen-canvas.js gif ' + fumen + ' ' + gif_name + ' --start ' + str(start_index) + ' --end ' + str(end_index)
     #print('created  '+gif_name)
     os.system(command)
