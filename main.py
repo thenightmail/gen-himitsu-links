@@ -4,6 +4,7 @@ from py_fumen_py import *
 import subprocess
 from pathlib import Path
 import os
+import random
 my_model = genanki.Model(
   234567, 'pc-run-fumen-flashcard',
   fields=[
@@ -26,7 +27,7 @@ my_model = genanki.Model(
   ],
 )
 my_deck = genanki.Deck(
-    1520042884,
+    random.randrange(1 << 30, 1 << 31),
 'genanki-fumen-deck')
 my_package = genanki.Package(my_deck)
 # TODO ask user for fumen or fumen file
@@ -87,6 +88,7 @@ def create_gif(start_index, end_index):
     #print('created  '+gif_name)
     os.system(command)
     my_package.media_files.append(gif_name)
+    print(my_package.media_files)
 
 remove_chars = {'#', 'Q', '[', ']', '=', '(', ')'}
 translate_table = str.maketrans('', '', ''.join(remove_chars))
