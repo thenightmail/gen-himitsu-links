@@ -70,7 +70,7 @@ def two_line(queue: str) -> bool:
         return True
     else:
         return False
-#TODO fix the naming of gifs to correspond
+#TODO fix it so that gifs are correctly imported into the collection
 def create_note(page) -> None:
     queue = ','.join(page.comment.translate(translate_table)[:11])
     save_text = pages[i+10].comment.translate(translate_table)[:1]
@@ -88,14 +88,15 @@ def create_gif(start_index, end_index):
     command = 'node ../fumen-canvas/fumen-canvas.js gif ' + fumen + ' ' + gif_name + ' --start ' + str(start_index) + ' --end ' + str(end_index)
     #print('created  '+gif_name)
     os.system(command)
-    print(gif_name)
-    my_package.media_files.append(gif_name)
+    #print(gif_name)
+    media_list.append(gif_name)
     #print(my_package.media_files)
 
 remove_chars = {'#', 'Q', '[', ']', '=', '(', ')'}
 translate_table = str.maketrans('', '', ''.join(remove_chars))
 two_line_count = 0
 pc_count = 0
+media_list = []
 print("generating pc notes and gifs ...\n")
 for i, page in enumerate(pages):
     if i % 10 == 0 + two_line_count and i + 10 + two_line_count < len(pages):
@@ -118,6 +119,6 @@ for i, page in enumerate(pages):
             #print("creating gif for four line pc, " + str(i))
             create_gif(i, i+two_line_count+10)
             create_note(page)
-
-my_package.write_to_file('output.apkg')
+my_package.media_files = media_list
 print(f"Added {len(my_package.media_files)} media files.")
+my_package.write_to_file('output.apkg')
